@@ -8,13 +8,18 @@ class Fighter:
     defense: int
     speed: int
     hp: int = field(default=None)
+    turn_meter: int = field(default=None, init=False)
 
     def __post_init__(self):
-        # Runs after setup of a fighter, sets the HP to the max
+        # Runs after setup of a fighter, sets the HP to the max. Rasies an error if fighter is set up with too much HP
         if self.hp is None:
             self.hp = self.max_hp
         elif self.hp > self.max_hp:
             raise ValueError(f"HP cannot exceed Max HP {self.hp}/{self.max_hp}")
+
+        # Initializes the turn meter at the fighter's speed
+        if self.turn_meter is None:
+            self.turn_meter = self.speed
 
     def __str__(self):
         return f"{self.name} | HP: {self.hp}/{self.max_hp}\nAttack: {self.attack} | Defense: {self.defense} | Speed: {self.speed}"
@@ -23,3 +28,7 @@ class Fighter:
     def take_damage(self, damage: int) -> bool:
         self.hp = max(0, self.hp - damage)
         return self.hp == 0
+
+    #This method advances the fighter's turn meter to compare during the simulation
+    def advance_turn(self):
+        self.turn_meter = self.turn_meter + self.speed
