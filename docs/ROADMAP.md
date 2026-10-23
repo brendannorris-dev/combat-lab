@@ -1,9 +1,9 @@
 # Project Roadmap
 
 ## Phase 1: Foundations
-- [ ] Initialize repo, README, .gitignore
-- [ ] Define Fighter data model - both enemy & player character can stem from this
-- [ ] Write basic damage formula (i.e. calculate_damage())
+- [x] Initialize repo, README, .gitignore
+- [x] Define Fighter data model - both enemy & player character can stem from this
+- [x] Write basic damage formula (i.e. calculate_damage())
 
 ## Phase 2: Single Combat Engine
 - [ ] Implement some element of turn order (higher speed acts first)
