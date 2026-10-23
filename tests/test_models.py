@@ -19,7 +19,7 @@ class TestFighter(unittest.TestCase):
         died = attacker.take_damage(100)
         self.assertTrue(died)
 
-    #Test to make sure tpython -m unittest test_models.pyhat damage doesn't turn negative
+    #Test to make sure that damage doesn't turn negative
     def test_no_negative_hp(self):
         attacker = Fighter("Warrior", 100, 50, 50, 25)
         attacker.take_damage(150)
