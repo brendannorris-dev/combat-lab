@@ -29,3 +29,28 @@ def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
             else:
                 fighter1.advance_turn()
             return result
+
+def simulate_fight(fighter1, fighter2, verbose=False):
+    #Initialize variables for fight simulator
+    death = False
+    attack_counter = 0
+
+    while not death:
+        attack_counter += 1
+        attacking = active_turn(fighter1, fighter2)
+        defending = fighter2 if attacking is fighter1 else fighter1
+        damage = calculate_damage(attacker=attacking, defender=defending)
+        death = defending.take_damage(damage)
+        
+        if verbose:
+            print(f"{attacking.name} attacks {defending.name} for {damage} damage!")
+            print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
+
+        if death:
+            if verbose:
+                print(f"{defending.name}'s HP has hit 0. {attacking.name} wins!")
+            return {
+                "winner": attacking.name,
+                "hp_remaining": attacking.hp,
+                "actions": attack_counter
+            }
