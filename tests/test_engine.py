@@ -1,4 +1,4 @@
-import unittest
+import unittest, random
 from models import Fighter
 from engine import calculate_damage, active_turn, simulate_fight
 
@@ -21,15 +21,26 @@ class TestTurnOrder(unittest.TestCase):
     #Single unit test to ensure the faster fighter moves first
     def test_faster_fighter_active(self):
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25)
-        speedy = Fighter(name="Speedy Warrior", max_hp=100, attack=10, defense=10, speed=70)
+        speedy = Fighter(name="Speedy Warrior", max_hp=100, attack=10, defense=10, speed=100)
+        warrior.advance_turn()
+        speedy.advance_turn()
         moves = active_turn(warrior, speedy)
         self.assertEqual(moves, speedy)
     
-    #Multiple call test to ensure that in the event of a turn meter tie, the base faster fighter moves
+    #Multiple call test to ensure that in the event of a turn meter tie, we use a random choice to break
     def test_tied_at_turn_base_speed_tiebreak(self):
+        random.seed(13)
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25)
         doublefast = Fighter(name="Warrior, doubly fast", max_hp=100, attack=50, defense=50, speed=50)
+        warrior.advance_turn()
+        doublefast.advance_turn()
+        warrior.advance_turn()
+        doublefast.advance_turn()
         move1 = active_turn(warrior, doublefast)
+        warrior.advance_turn()
+        doublefast.advance_turn()
+        warrior.advance_turn()
+        doublefast.advance_turn()
         move2 = active_turn(warrior, doublefast)
         self.assertEqual(move1, doublefast)
         self.assertEqual(move2, doublefast)
@@ -40,22 +51,45 @@ class TestTurnOrder(unittest.TestCase):
     def test_slower_speed_overtakes_turn(self):
         slow = Fighter(name="Slow Fighter", max_hp=100, attack=50, defense=50, speed=15)
         fast = Fighter(name="Fast Fighter", max_hp=100, attack=50, defense=50, speed=50)
+        slow.advance_turn()
+        fast.advance_turn()
+        slow.advance_turn()
+        fast.advance_turn()
         active_turn(slow, fast)
+        slow.advance_turn()
+        fast.advance_turn()
+        slow.advance_turn()
+        fast.advance_turn()
         active_turn(slow, fast)
+        slow.advance_turn()
+        fast.advance_turn()
+        slow.advance_turn()
+        fast.advance_turn()
         active_turn(slow, fast)
+        slow.advance_turn()
+        fast.advance_turn()
         move4 = active_turn(slow, fast)
         self.assertEqual(move4, slow)
 
+    #Test that if two fighters both hit the turn threshold that the one further ahead the threshold acts first
+    def test_both_fighters_above_threshold(self):
+        pass
+
     #Call to handle/verify randomness in the event that turn meter and speed tie
     def test_randomness_distribution_in_both_tie(self):
-        fighter1 = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=20)
-        fighter2 = Fighter(name="Identical Warrior", max_hp=100, attack=50, defense=50, speed=20)
+        results = []
+        for _ in range(1000):
+            fighter1 = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=100)
+            fighter2 = Fighter(name="Identical Warrior", max_hp=100, attack=50, defense=50, speed=100)
+            fighter1.advance_turn()
+            fighter2.advance_turn()
+            winner = active_turn(fighter1=fighter1, fighter2=fighter2)
+            results.append(winner.name)
 
-        results = [active_turn(fighter1,fighter2) for _ in range(1000)]
-        fighter1_wins = results.count(fighter1)
+        fighter1_wins = results.count("Warrior")
 
         #Checks for roughly 50% tiebreak for fighter1
-        self.assertTrue(350 < fighter1_wins < 650)
+        self.assertTrue(400 < fighter1_wins < 600)
 
 class TestSimulateFight(unittest.TestCase):
     #Test when there is a clear winner and assure they win

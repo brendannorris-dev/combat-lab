@@ -1,4 +1,5 @@
 from models import Fighter
+from constants import TURN_THRESHOLD
 import random
 
 def calculate_damage(attacker: Fighter, defender: Fighter) -> int:
@@ -7,50 +8,65 @@ def calculate_damage(attacker: Fighter, defender: Fighter) -> int:
     return damage
 
 def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
-    #Whichever is further ahead in the timeline acts (is returned) and the other has their turn_meter pushed forward
-    if fighter1.turn_meter > fighter2.turn_meter:
-        fighter2.advance_turn()
-        return fighter1
-    elif fighter2.turn_meter > fighter1.turn_meter:
-        fighter1.advance_turn()
-        return fighter2
-    #Ties are broken by the fighter's base speed
-    else:
-        if fighter1.speed > fighter2.speed:
-            fighter2.advance_turn()
+    #New version of active turn utilizes a global time tracking threshold (100), not relative speeds
+    #Checks for both fighters above the threshold and breaks the tie
+    if fighter1.turn_meter >= TURN_THRESHOLD and fighter2.turn_meter >= TURN_THRESHOLD:
+        if fighter1.turn_meter > fighter2.turn_meter:
+            fighter1.turn_meter -= TURN_THRESHOLD
             return fighter1
-        elif fighter2.speed > fighter1.speed:
-            fighter1.advance_turn()
+        elif fighter2.turn_meter > fighter1.turn_meter:
+            fighter2.turn_meter -= TURN_THRESHOLD
             return fighter2
         else:
             result = random.choice((fighter1, fighter2))
-            if result == fighter1:
-                fighter2.advance_turn()
-            else:
-                fighter1.advance_turn()
+            result.turn_meter -= TURN_THRESHOLD
             return result
+    #Otherwise checks each individually and returns; otherwise returns none and no attacks for that tick
+    else:
+        if fighter1.turn_meter >= TURN_THRESHOLD:
+            fighter1.turn_meter -= TURN_THRESHOLD
+            return fighter1
+        if fighter2.turn_meter >= TURN_THRESHOLD:
+            fighter2.turn_meter -= TURN_THRESHOLD
+            return fighter2
+    return None
+        
 
 def simulate_fight(fighter1, fighter2, verbose=False):
     #Initialize variables for fight simulator
     death = False
     attack_counter = 0
+    ticks_elapsed = 0
 
     while not death:
-        attack_counter += 1
-        attacking = active_turn(fighter1, fighter2)
-        defending = fighter2 if attacking is fighter1 else fighter1
-        damage = calculate_damage(attacker=attacking, defender=defending)
-        death = defending.take_damage(damage)
-        
-        if verbose:
-            print(f"{attacking.name} attacks {defending.name} for {damage} damage!")
-            print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
+        #Moves forward one tick, fighters move in timeline equal to their speed
+        ticks_elapsed += 1
+        fighter1.advance_turn()
+        fighter2.advance_turn()
 
-        if death:
+        #Creating an inner loop to account for when a fighter hits the turn threshold more than once or both fighters hit the threshold without progressing ticks
+        while True:
+            #Sets attacker to who is returned from active_turn function, exits if None is returned
+            attacking = active_turn(fighter1, fighter2)
+            if attacking is None:
+                break
+            defending = fighter2 if attacking is fighter1 else fighter1
+
+            #Registers an attack happens, raising the counter if so
+            attack_counter += 1
+            damage = calculate_damage(attacker=attacking, defender=defending)
+            death = defending.take_damage(damage)
+            
             if verbose:
-                print(f"{defending.name}'s HP has hit 0. {attacking.name} wins!")
-            return {
-                "winner": attacking.name,
-                "hp_remaining": attacking.hp,
-                "actions": attack_counter
-            }
+                print(f"{attacking.name} attacks {defending.name} for {damage} damage!")
+                print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
+
+            if death:
+                if verbose:
+                    print(f"{defending.name}'s HP has hit 0. {attacking.name} wins!")
+                return {
+                    "winner": attacking.name,
+                    "hp_remaining": attacking.hp,
+                    "actions": attack_counter,
+                    "ticks_elapsed": ticks_elapsed
+                }

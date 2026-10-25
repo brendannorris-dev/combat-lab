@@ -19,7 +19,7 @@ class Fighter:
 
         # Initializes the turn meter at the fighter's speed
         if self.turn_meter is None:
-            self.turn_meter = self.speed
+            self.turn_meter = 0
 
     def __str__(self):
         return f"{self.name} | HP: {self.hp}/{self.max_hp}\nAttack: {self.attack} | Defense: {self.defense} | Speed: {self.speed}"
