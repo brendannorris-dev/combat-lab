@@ -5,17 +5,38 @@ from engine import calculate_damage, active_turn, simulate_fight
 class TestDamage(unittest.TestCase):
     # Test to make sure damage calculation works under normal circumstances
     def test_damage_calculation(self):
-        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25)
-        goblin = Fighter(name="Goblin", max_hp=100, attack=50, defense=25, speed=25)
-        result = calculate_damage(warrior, goblin)
+        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25, crit_chance=0)
+        goblin = Fighter(name="Goblin", max_hp=100, attack=50, defense=25, speed=25, crit_chance=0)
+        result, _ = calculate_damage(warrior, goblin)
         self.assertEqual(result, 25)
 
     # Test to make sure that it defaults to 1 damage if defender defense is too high
     def test_damage_not_negative(self):
-        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25)
+        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25, crit_chance=0)
         wall = Fighter(name="Wall", max_hp=1000, attack=0, defense=500, speed=0)
-        result = calculate_damage(warrior, wall)
+        result, _ = calculate_damage(warrior, wall)
         self.assertEqual(result, 1)
+
+    # Test to assure critical hit applies appropriate damage calculation
+    def test_guaranteed_crit_changes_damage(self):
+        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=100, crit_chance=1)
+        dummy = Fighter(name="Dummy", max_hp=1000, attack=0, defense=0, speed=0)
+        result, _ = calculate_damage(warrior, dummy)
+        self.assertTrue(result > 50)
+
+    # Test to assure random distribution of critical hits (when crit chance is boosted to 50%)
+    def test_randomness_distribution_crit_hit(self):
+        results = []
+        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=100, crit_chance=0.5)
+        dummy = Fighter(name="Dummy", max_hp=1000, attack=0, defense=0, speed=0)
+
+        for _ in range(1000):
+            _, crit = calculate_damage(warrior, dummy)
+            results.append(crit)
+
+        crit_count = results.count(True)
+        self.assertTrue(300 < crit_count < 700)
+
 
 class TestTurnOrder(unittest.TestCase):
     #Single unit test to ensure the faster fighter moves first
@@ -73,7 +94,12 @@ class TestTurnOrder(unittest.TestCase):
 
     #Test that if two fighters both hit the turn threshold that the one further ahead the threshold acts first
     def test_both_fighters_above_threshold(self):
-        pass
+        fighter1 = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=150)
+        fighter2 = Fighter(name="Warrior 2", max_hp=100, attack=50, defense=50, speed=140)
+        fighter1.advance_turn()
+        fighter2.advance_turn()
+        winner = active_turn(fighter1=fighter1, fighter2=fighter2)
+        self.assertEqual(fighter1, winner)
 
     #Call to handle/verify randomness in the event that turn meter and speed tie
     def test_randomness_distribution_in_both_tie(self):

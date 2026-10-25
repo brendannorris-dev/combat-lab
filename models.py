@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from constants import CRIT_DAMAGE, CRIT_RATE
 
 @dataclass
 class Fighter:
@@ -9,6 +10,8 @@ class Fighter:
     speed: int
     hp: int = field(default=None)
     turn_meter: int = field(default=None, init=False)
+    crit_chance: float = field(default=CRIT_RATE)
+    crit_damage_mod: float = field(default=CRIT_DAMAGE)
 
     def __post_init__(self):
         # Runs after setup of a fighter, sets the HP to the max. Rasies an error if fighter is set up with too much HP
