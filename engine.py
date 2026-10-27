@@ -2,17 +2,22 @@ from models import Fighter
 from constants import TURN_THRESHOLD
 import random
 
-def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool]:
+def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, bool]:
+    #Checks if defender evades attack before looking for damage
+    evaded_hit = random.random() < defender.evasion_chance
+    if evaded_hit:
+        return 0, False, evaded_hit
+    
     #Ensures that a fighter always deals a minimum of one damage
     base_damage = max(1, attacker.attack - defender.defense)
     damage = int(base_damage * random.uniform(0.9, 1.1))
 
+    #Checks for critical hit & applies damage
     crit_hit = random.random() < attacker.crit_chance
-
     if crit_hit:
         damage = int(damage * attacker.crit_damage_mod)
 
-    return damage, crit_hit
+    return damage, crit_hit, False
 
 def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
     #New version of active turn utilizes a global time tracking threshold (100), not relative speeds
@@ -61,10 +66,13 @@ def simulate_fight(fighter1, fighter2, verbose=False):
 
             #Registers an attack happens, raising the counter if so
             attack_counter += 1
-            damage, crit_hit = calculate_damage(attacker=attacking, defender=defending)
+            damage, crit_hit, evaded = calculate_damage(attacker=attacking, defender=defending)
             death = defending.take_damage(damage)
             
             if verbose:
+                if evaded:
+                    print(f"{defending.name} evaded the hit!")
+                    print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
                 if crit_hit:
                     print(f"Critical Hit! {attacking.name} attacks {defending.name} for {damage} damage!")
                     print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")

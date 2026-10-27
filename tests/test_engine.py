@@ -8,21 +8,22 @@ class TestDamage(unittest.TestCase):
         random.seed(13)
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25, crit_chance=0)
         goblin = Fighter(name="Goblin", max_hp=100, attack=50, defense=25, speed=25, crit_chance=0)
-        result, _ = calculate_damage(warrior, goblin)
-        self.assertEqual(result, 23)
+        result, _, _ = calculate_damage(warrior, goblin)
+        self.assertEqual(result, 25)
 
     # Test to make sure that it defaults to 1 damage if defender defense is too high
     def test_damage_not_negative(self):
+        random.seed(13)
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25, crit_chance=0)
         wall = Fighter(name="Wall", max_hp=1000, attack=0, defense=500, speed=0)
-        result, _ = calculate_damage(warrior, wall)
+        result, _, _ = calculate_damage(warrior, wall)
         self.assertEqual(result, 1)
 
     # Test to assure critical hit applies appropriate damage calculation
     def test_guaranteed_crit_changes_damage(self):
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=100, crit_chance=1)
         dummy = Fighter(name="Dummy", max_hp=1000, attack=0, defense=0, speed=0)
-        result, _ = calculate_damage(warrior, dummy)
+        result, _, _ = calculate_damage(warrior, dummy)
         self.assertTrue(result > 50)
 
     # Test to assure random distribution of critical hits (when crit chance is boosted to 50%)
@@ -32,11 +33,18 @@ class TestDamage(unittest.TestCase):
         dummy = Fighter(name="Dummy", max_hp=1000, attack=0, defense=0, speed=0)
 
         for _ in range(1000):
-            _, crit = calculate_damage(warrior, dummy)
+            _, crit, _ = calculate_damage(warrior, dummy)
             results.append(crit)
 
         crit_count = results.count(True)
         self.assertTrue(300 < crit_count < 700)
+
+    #Test that evasion works
+    def test_evasion(self):
+        warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=100)
+        ghost = Fighter(name="Ghost", max_hp=5, attack = 0, defense = 0, speed=0, evasion_chance=1)
+        result, _, _ = calculate_damage(warrior, ghost)
+        self.assertEqual(result, 0)
 
 
 class TestTurnOrder(unittest.TestCase):
