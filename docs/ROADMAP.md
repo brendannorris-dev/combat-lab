@@ -13,9 +13,9 @@
 
 ## Phase 3: Increase Depth to Fight
 - [ ] Examine alternate methods to make combat more interesting & add depth
-  - [ ] Critical Rate?
+  - [x] Critical Rate?
   - [ ] Evasion Rate?
-  - [ ] Damage Variance?
+  - [x] Damage Variance?
   - [ ] Blocking?
 
 ## Phase 4: Expand Single Fight to Monte Carlo Runner

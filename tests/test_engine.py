@@ -5,10 +5,11 @@ from engine import calculate_damage, active_turn, simulate_fight
 class TestDamage(unittest.TestCase):
     # Test to make sure damage calculation works under normal circumstances
     def test_damage_calculation(self):
+        random.seed(13)
         warrior = Fighter(name="Warrior", max_hp=100, attack=50, defense=50, speed=25, crit_chance=0)
         goblin = Fighter(name="Goblin", max_hp=100, attack=50, defense=25, speed=25, crit_chance=0)
         result, _ = calculate_damage(warrior, goblin)
-        self.assertEqual(result, 25)
+        self.assertEqual(result, 23)
 
     # Test to make sure that it defaults to 1 damage if defender defense is too high
     def test_damage_not_negative(self):
