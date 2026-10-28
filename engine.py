@@ -7,17 +7,17 @@ def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, b
     evaded_hit = random.random() < defender.evasion_chance
     if evaded_hit:
         return 0, False, evaded_hit
-    
-    #Ensures that a fighter always deals a minimum of one damage
-    base_damage = max(1, attacker.attack - defender.defense)
-    damage = int(base_damage * random.uniform(0.9, 1.1))
+
+    base_damage = attacker.attack - defender.defense
+    damage = base_damage * random.uniform(0.9, 1.1)
 
     #Checks for critical hit & applies damage
     crit_hit = random.random() < attacker.crit_chance
     if crit_hit:
-        damage = int(damage * attacker.crit_damage_mod)
+        damage = damage * attacker.crit_damage_mod
 
-    return damage, crit_hit, False
+    damage = max(1, int(damage))
+    return damage, crit_hit, evaded_hit
 
 def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
     #New version of active turn utilizes a global time tracking threshold (100), not relative speeds
