@@ -76,13 +76,14 @@ def simulate_fight(fighter1, fighter2, verbose=False):
             if verbose:
                 if evaded:
                     print(f"{defending.name} evaded the hit!")
-                    print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
-                if crit_hit:
-                    print(f"Critical Hit! {attacking.name} attacks {defending.name} for {damage} damage!")
-                    print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
                 else:
+                    if crit_hit:
+                        print("Critical Hit! ", end="")
+                    if blocked:
+                        print("Blocked! ", end="")
+                
                     print(f"{attacking.name} attacks {defending.name} for {damage} damage!")
-                    print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
+                print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
 
             if death:
                 if verbose:

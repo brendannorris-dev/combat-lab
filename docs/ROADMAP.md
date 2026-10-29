@@ -12,11 +12,11 @@
 - [x] Stretch: Include a verbose mode to play out a single fight descriptively (for demoing purposes)
 
 ## Phase 3: Increase Depth to Fight
-- [ ] Examine alternate methods to make combat more interesting & add depth
+- [x] Examine alternate methods to make combat more interesting & add depth
   - [x] Critical Rate?
-  - [ ] Evasion Rate?
+  - [x] Evasion Rate?
   - [x] Damage Variance?
-  - [ ] Blocking?
+  - [x] Blocking?
 
 ## Phase 4: Expand Single Fight to Monte Carlo Runner
 - [ ] Implement a loop to run the simulation x times
