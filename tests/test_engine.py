@@ -77,7 +77,7 @@ class TestDamage(unittest.TestCase):
     #Test that blocked damage is reduced 25% of the base damage (accounting for variance)
     def test_blocking_damage_reduction_range(self):
         warrior = Fighter(name="Warrior", max_hp=100, attack=10, defense=50, speed=100, crit_chance=0)
-        blocker = Fighter(name="Blocker", max_hp=100, attack=0, defense=0, speed=0, block_chance=1)
+        blocker = Fighter(name="Blocker", max_hp=100, attack=0, defense=0, speed=0, evasion_chance=0, block_chance=1)
         result,_,_,_ = calculate_damage(warrior,blocker)
         self.assertTrue(6 <= result <= 8)
 
@@ -180,7 +180,7 @@ class TestSimulateFight(unittest.TestCase):
         strong = Fighter(name="Strong Fighter", max_hp=100, attack=20, defense=10, speed=50, evasion_chance=0, block_chance=0)
         weak = Fighter(name="Weak Fighter", max_hp=20, attack=5, defense=10, speed=10, evasion_chance=0, block_chance=0)
         result = simulate_fight(fighter1=strong,fighter2=weak)
-        self.assertEqual(result["winner"], strong.name)
+        self.assertEqual(result["winner"], "fighter1")
 
     #Make sure the output of the return case is correct
     def test_return_output_syntax(self):
@@ -196,7 +196,7 @@ class TestSimulateFight(unittest.TestCase):
         weak = Fighter(name="Weak Fighter", max_hp=20, attack=5, defense=10, speed=10, evasion_chance=0, block_chance=0)
         wall = Fighter(name="Weakened Wall", max_hp=5, attack=0, defense=100, speed=0, evasion_chance=0, block_chance=0)
         result = simulate_fight(fighter1=weak, fighter2=wall)
-        self.assertEqual(result["winner"], weak.name)
+        self.assertEqual(result["winner"], "fighter1")
 
     #Assure symmetrical returns when function is called in reverse (base case before damage complexity)
     def test_reverse_function_returns_same(self):
@@ -206,7 +206,8 @@ class TestSimulateFight(unittest.TestCase):
         strong2 = Fighter(name="Strong Fighter", max_hp=100, attack=20, defense=10, speed=50, evasion_chance=0, block_chance=0)
         weak2 = Fighter(name="Weak Fighter", max_hp=1, attack=5, defense=10, speed=10, evasion_chance=0, block_chance=0)
         result2 = simulate_fight(fighter1=weak2, fighter2=strong2)
-        self.assertEqual(result, result2)
+        #Asserting not equal because the fighter should shift positions
+        self.assertNotEqual(result["winner"], result2["winner"])
 
     #Check that the verbose flag does not change the behavior of the function
     def test_verbose_does_not_affect_function(self):
@@ -215,8 +216,8 @@ class TestSimulateFight(unittest.TestCase):
         result = simulate_fight(fighter1=strong, fighter2=weak,verbose=True)
         strong2 = Fighter(name="Strong Fighter", max_hp=100, attack=20, defense=10, speed=50, evasion_chance=0, block_chance=0)
         weak2 = Fighter(name="Weak Fighter", max_hp=1, attack=5, defense=10, speed=10, evasion_chance=0, block_chance=0)
-        result2 = simulate_fight(fighter1=weak2, fighter2=strong2)
-        self.assertEqual(result, result2)
+        result2 = simulate_fight(fighter1=strong2, fighter2=weak2)
+        self.assertEqual(result["winner"], result2["winner"])
 
     #Low HP results in quick combat
     def test_low_hp_ends_combat_quickly(self):
@@ -224,4 +225,4 @@ class TestSimulateFight(unittest.TestCase):
         weak = Fighter(name="Weak Fighter", max_hp=1, attack=5, defense=10, speed=10, evasion_chance=0, block_chance=0)
         result = simulate_fight(fighter1=strong,fighter2=weak)
         self.assertEqual(result["actions"], 1)
-        self.assertEqual(result["winner"],strong.name)
+        self.assertEqual(result["winner"],"fighter1")

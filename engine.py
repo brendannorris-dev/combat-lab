@@ -4,9 +4,9 @@ import random
 
 def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, bool, bool]:
     #Checks if defender evades attack before looking for damage
-    evaded_hit = random.random() < defender.evasion_chance
-    if evaded_hit:
-        return 0, False, evaded_hit, False
+    evaded = random.random() < defender.evasion_chance
+    if evaded:
+        return 0, False, evaded, False
 
     base_damage = attacker.attack - defender.defense
     damage = base_damage * random.uniform(0.9, 1.1)
@@ -21,7 +21,7 @@ def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, b
         damage = damage * BLOCK_DAMAGE
 
     damage = max(1, int(damage))
-    return damage, crit_hit, evaded_hit, blocked
+    return damage, crit_hit, evaded, blocked
 
 def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
     #New version of active turn utilizes a global time tracking threshold (100), not relative speeds
@@ -52,6 +52,8 @@ def simulate_fight(fighter1, fighter2, verbose=False):
     #Initialize variables for fight simulator
     death = False
     attack_counter = 0
+    fighter1_attacks = 0
+    fighter2_attacks = 0
     ticks_elapsed = 0
 
     while not death:
@@ -70,6 +72,11 @@ def simulate_fight(fighter1, fighter2, verbose=False):
 
             #Registers an attack happens, raising the counter if so
             attack_counter += 1
+            if attacking is fighter1:
+                fighter1_attacks += 1
+            if attacking is fighter2:
+                fighter2_attacks += 1
+            
             damage, crit_hit, evaded, blocked = calculate_damage(attacker=attacking, defender=defending)
             death = defending.take_damage(damage)
             
@@ -86,11 +93,16 @@ def simulate_fight(fighter1, fighter2, verbose=False):
                 print(f"{fighter1.name}: {fighter1.hp}/{fighter1.max_hp} | {fighter2.name}: {fighter2.hp}/{fighter2.max_hp}")
 
             if death:
+                winner = "fighter1" if attacking is fighter1 else "fighter2"
                 if verbose:
                     print(f"{defending.name}'s HP has hit 0. {attacking.name} wins!")
                 return {
-                    "winner": attacking.name,
+                    "winner": winner,
                     "hp_remaining": attacking.hp,
                     "actions": attack_counter,
-                    "ticks_elapsed": ticks_elapsed
+                    "ticks_elapsed": ticks_elapsed,
+                    "fighter1_name": fighter1.name,
+                    "fighter1_attacks": fighter1_attacks,
+                    "fighter2_name": fighter2.name,
+                    "fighter2_attacks": fighter2_attacks
                 }
