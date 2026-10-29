@@ -1,12 +1,12 @@
 from models import Fighter
-from constants import TURN_THRESHOLD
+from constants import TURN_THRESHOLD, BLOCK_DAMAGE
 import random
 
-def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, bool]:
+def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, bool, bool]:
     #Checks if defender evades attack before looking for damage
     evaded_hit = random.random() < defender.evasion_chance
     if evaded_hit:
-        return 0, False, evaded_hit
+        return 0, False, evaded_hit, False
 
     base_damage = attacker.attack - defender.defense
     damage = base_damage * random.uniform(0.9, 1.1)
@@ -16,8 +16,12 @@ def calculate_damage(attacker: Fighter, defender: Fighter) -> tuple[int, bool, b
     if crit_hit:
         damage = damage * attacker.crit_damage_mod
 
+    blocked = random.random() < defender.block_chance
+    if blocked:
+        damage = damage * BLOCK_DAMAGE
+
     damage = max(1, int(damage))
-    return damage, crit_hit, evaded_hit
+    return damage, crit_hit, evaded_hit, blocked
 
 def active_turn(fighter1: Fighter, fighter2: Fighter) -> Fighter:
     #New version of active turn utilizes a global time tracking threshold (100), not relative speeds
@@ -66,7 +70,7 @@ def simulate_fight(fighter1, fighter2, verbose=False):
 
             #Registers an attack happens, raising the counter if so
             attack_counter += 1
-            damage, crit_hit, evaded = calculate_damage(attacker=attacking, defender=defending)
+            damage, crit_hit, evaded, blocked = calculate_damage(attacker=attacking, defender=defending)
             death = defending.take_damage(damage)
             
             if verbose:

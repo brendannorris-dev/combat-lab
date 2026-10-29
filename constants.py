@@ -12,3 +12,6 @@ EVASION_RATE = 0.025
 
 #Global block rate
 BLOCK_RATE = 0.05
+
+#Global block damage modifier (25% reduction)
+BLOCK_DAMAGE = 0.75
